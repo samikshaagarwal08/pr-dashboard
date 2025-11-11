@@ -1,8 +1,18 @@
-import jsPDF from "jspdf";
-// @ts-expect-error: No types available for 'dom-to-image-more'
-import domtoimage from "dom-to-image-more";
-
 export const handleDownloadPDF = async (elementId: string) => {
+  if (typeof window === "undefined") {
+    console.warn("PDF generation is only available in the browser.");
+    return;
+  }
+
+  const [{ default: jsPDF }, domToImageModule] = await Promise.all([
+    import("jspdf"),
+    import("dom-to-image-more"),
+  ]);
+
+  // Some bundlers expose the library as a default export, others as the module itself.
+  const domtoimage =
+    (domToImageModule as { default?: any }).default ?? domToImageModule;
+
   const input = document.getElementById(elementId);
   if (!input) {
     console.error(`Element with id "${elementId}" not found.`);

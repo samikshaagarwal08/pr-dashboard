@@ -50,15 +50,6 @@ export default function ProjectAnalysisPage() {
                 Monitor test workflow health, uncover trends, and communicate progress at a glance.
               </p>
             </div>
-            {/* <div className="flex items-center gap-3 rounded-2xl bg-indigo-50 px-4 py-3 text-indigo-700">
-              <span className="text-2xl">⚙️</span>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-indigo-400">
-                  Latest Sync
-                </p>
-                <p className="font-semibold">Automated QA Pipeline</p>
-              </div>
-            </div> */}
           </header>
 
           <PerformanceStats
