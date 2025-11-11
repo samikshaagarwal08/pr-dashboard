@@ -1,0 +1,6 @@
+Task,ManualTime,AutomatedTime,ErrorsManual,ErrorsAutomated,Comments
+PR Review,30,12,5,1,"Automated lint check reduces errors"
+Issue Labeling,10,4,3,0,"Make.com auto-labeling works faster"
+Changelog Update,20,8,2,0,"Fewer omissions in changelog"
+Contributor Report,25,10,1,0,"Dashboard automates reporting"
+Release Summary,15,6,2,0,"Instant changelog updates"

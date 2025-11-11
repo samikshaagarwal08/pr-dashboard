@@ -3,7 +3,10 @@
 import ManualVsAutomatedChart from "@/components/Analysis/ManualVsAutomatedChart";
 import PerformanceStats from "@/components/Analysis/PerformanceStats";
 import ProjectAnalysisCharts from "@/components/Analysis/ProjectAnalysisCharts";
+import { Button } from "@/components/ui/button";
 import { useMakeData } from "@/hooks/useMakeData";
+import { Sparkles } from "lucide-react";
+import Link from "next/link";
 
 export default function ProjectAnalysisPage() {
   const { data, loading } = useMakeData();
@@ -49,6 +52,14 @@ export default function ProjectAnalysisPage() {
               <p className="mt-3 max-w-xl text-base text-slate-500">
                 Monitor test workflow health, uncover trends, and communicate progress at a glance.
               </p>
+            </div>
+            <div>
+              <Button variant="outline">
+                <Link href="/ai-insights" className="flex items-center gap-2">
+                  <Sparkles size={16} />
+                  View AI Insights
+                </Link>  
+              </Button>
             </div>
           </header>
 
