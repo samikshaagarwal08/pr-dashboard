@@ -11,30 +11,119 @@ import PullRequestsTable from "@/components/PullRequestTable";
 import ReportSection from "@/components/ReportSection";
 import { useMemo, useState } from "react";
 
+type DashboardHeadlineMetric = {
+  label: string;
+  value: number;
+  accent: string;
+};
+
+type DashboardSummary = {
+  total: number;
+  open: number;
+  closed: number;
+  merged: number;
+  lintSuccessRate: number;
+};
+
+type DashboardAnalytics = {
+  headlineMetrics: DashboardHeadlineMetric[];
+  statusBreakdown: { name: string; value: number }[];
+  monthlyActivity: { month: string; count: number }[];
+  contributors: { name: string; count: number }[];
+  summary: DashboardSummary;
+};
+
 export default function DashboardPage() {
-  const { data, loading } = usePRData();
+  const { data, loading, error } = usePRData();
   const [downloading, setDownloading] = useState(false);
 
-  const headlineMetrics = useMemo(() => {
-    const merged = data.filter((d) => d.Status === "merged").length;
-    const open = data.filter((d) => d.Status === "open").length;
-    const closed = data.filter((d) => d.Status === "closed").length;
-    
-    return [
-      { label: "Merged PRs", value: merged, accent: "text-emerald-600" },
-      { label: "Open PRs", value: open, accent: "text-indigo-600" },
-      {
-        label: "Closed PRs",
-        value: closed,
-        accent: "text-slate-600",
-      },
+  const analytics = useMemo<DashboardAnalytics>(() => {
+    const statusCounts = { open: 0, closed: 0, merged: 0 };
+    const contributorCounts = new Map<string, number>();
+    const monthlyCounts = new Map<string, number>();
+    let lintSuccess = 0;
+
+    data.forEach((pr) => {
+      const status = String(pr.Status ?? "").toLowerCase();
+      if (statusCounts.open !== undefined && status === "open") {
+        statusCounts.open += 1;
+      } else if (statusCounts.closed !== undefined && status === "closed") {
+        statusCounts.closed += 1;
+      } else if (statusCounts.merged !== undefined && status === "merged") {
+        statusCounts.merged += 1;
+      }
+
+      const author = String(pr.Author ?? "Unknown");
+      contributorCounts.set(author, (contributorCounts.get(author) ?? 0) + 1);
+
+      const createdAt = pr["Created At"];
+      const date = createdAt ? new Date(createdAt) : undefined;
+      if (date && !Number.isNaN(date.getTime())) {
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        monthlyCounts.set(key, (monthlyCounts.get(key) ?? 0) + 1);
+      }
+
+      const lintStatus = String(pr["Lint Status"] ?? "").toLowerCase();
+      if (lintStatus.includes("success")) {
+        lintSuccess += 1;
+      }
+    });
+
+    const total = data.length;
+    const lintSuccessRate = total === 0 ? 0 : Number(((lintSuccess / total) * 100).toFixed(1));
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthlyActivity = Array.from(monthlyCounts.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([ym, count]) => {
+        const [year, month] = ym.split("-");
+        const monthIndex = Number(month) - 1;
+        const monthLabel = monthIndex >= 0 && monthIndex < monthNames.length ? monthNames[monthIndex] : month;
+        return { month: `${monthLabel} '${year.slice(-2)}`, count };
+      });
+
+    const headlineMetrics: DashboardHeadlineMetric[] = [
+      { label: "Merged PRs", value: statusCounts.merged, accent: "text-emerald-600" },
+      { label: "Open PRs", value: statusCounts.open, accent: "text-indigo-600" },
+      { label: "Closed PRs", value: statusCounts.closed, accent: "text-slate-600" },
     ];
+
+    return {
+      headlineMetrics,
+      statusBreakdown: [
+        { name: "Open", value: statusCounts.open },
+        { name: "Closed", value: statusCounts.closed },
+        { name: "Merged", value: statusCounts.merged },
+      ],
+      monthlyActivity,
+      contributors: Array.from(contributorCounts.entries())
+        .sort(([, a], [, b]) => b - a)
+        .map(([name, count]) => ({ name, count })),
+      summary: {
+        total,
+        open: statusCounts.open,
+        closed: statusCounts.closed,
+        merged: statusCounts.merged,
+        lintSuccessRate,
+      },
+    };
   }, [data]);
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-white to-indigo-50">
         <p className="text-sm font-medium text-slate-500">Loading analytics...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-white to-indigo-50">
+        <div className="rounded-2xl border border-rose-200 bg-white/80 px-6 py-5 shadow-lg shadow-rose-100/60">
+          <p className="text-sm font-semibold text-rose-600">We couldn&apos;t load the dashboard data.</p>
+          <p className="mt-2 text-xs text-rose-500">Error: {error}</p>
+        </div>
       </div>
     );
   }
@@ -90,7 +179,7 @@ export default function DashboardPage() {
           </header>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            {headlineMetrics.map((metric) => (
+            {analytics.headlineMetrics.map((metric) => (
               <div
                 key={metric.label}
                 className="rounded-2xl border border-slate-200 bg-linear-to-br from-white via-white to-slate-50 p-5 shadow-sm"
@@ -135,13 +224,16 @@ export default function DashboardPage() {
 
             <TabsContent value="overview" className="mt-8">
               <div className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm">
-                <OverviewCharts data={data} />
+                <OverviewCharts
+                  statusBreakdown={analytics.statusBreakdown}
+                  monthlyActivity={analytics.monthlyActivity}
+                />
               </div>
             </TabsContent>
 
             <TabsContent value="contributors" className="mt-8">
               <div className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm">
-                <ContributorsView data={data} />
+                <ContributorsView contributors={analytics.contributors} />
               </div>
             </TabsContent>
 
@@ -153,7 +245,7 @@ export default function DashboardPage() {
 
             <TabsContent value="reports" className="mt-8">
               <div className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm">
-                <ReportSection data={data} />
+                <ReportSection summary={analytics.summary} />
               </div>
             </TabsContent>
           </Tabs>
