@@ -28,8 +28,8 @@ const featureHighlights = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-indigo-50">
-      <main className="mx-auto max-w-6xl px-6 py-20">
+    <div className="bg-linear-to-br h-screen from-slate-50 via-white to-indigo-50">
+      <main className="mx-auto max-w-6xl px-6 pt-10">
         <section className="rounded-3xl border border-slate-200/60 bg-white/80 p-12 shadow-xl backdrop-blur-md">
           <div className="flex flex-col gap-12 lg:flex-row">
             <div className="lg:w-3/5">
@@ -58,6 +58,12 @@ export default function HomePage() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/70 px-6 py-3 text-sm font-semibold text-indigo-600 shadow-sm transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50/70"
                 >
                   View Project Analysis
+                </Link>
+                <Link
+                  href="/scenario"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-6 py-3 text-sm font-semibold text-violet-700 shadow-sm transition-all duration-200 hover:border-violet-300 hover:bg-violet-100"
+                >
+                  Scenario Documentation
                 </Link>
               </div>
 
