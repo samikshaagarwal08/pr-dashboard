@@ -1,4 +1,23 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PR Dashboard
+
+This is a [Next.js](https://nextjs.org) project that provides a comprehensive dashboard for tracking and analyzing Pull Request (PR) workflows, integrated with GitHub automation and AI-powered insights.
+
+## Features
+
+### Automated PR Management
+- **PR Lifecycle Tracking**: Automatically tracks PR events (open, close, merge) via GitHub webhooks
+- **AI-Powered Reviews**: Uses Gemini API for automated code review and linting
+- **Automated Changelog Updates**: When a PR is merged, the `CHANGELOG.md` file is automatically updated with:
+  - PR title
+  - Merge date
+  - Changed files
+  - AI-generated summary using Gemini API
+
+### Dashboard & Analytics
+- Real-time PR dashboard with visualizations
+- Project analysis charts
+- Contributor activity tracking
+- Performance metrics and insights
 
 ## Getting Started
 
@@ -16,9 +35,21 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Make sure to set up the following environment variables:
+
+- `GEMINI_API_KEY`: Your Google Gemini API key for AI-powered features and changelog generation
+
+## Changelog Auto-Generation
+
+The system automatically updates `CHANGELOG.md` whenever a PR is merged. This feature:
+
+1. Captures the PR title, merge date, and changed files
+2. Uses the Gemini API to generate a summary of the changes
+3. Appends the entry to `CHANGELOG.md` in a structured format
+
+This ensures your changelog stays up-to-date without manual intervention.
 
 ## Learn More
 

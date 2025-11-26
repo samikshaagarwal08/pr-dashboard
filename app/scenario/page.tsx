@@ -59,9 +59,11 @@ const routerBranches = [
     name: "PR Merge",
     color: "border-blue-200 bg-blue-50/70",
     highlight:
-      "Logs merged artifacts and prepares data for future changelog / README automation.",
+      "Logs merged artifacts, updates CHANGELOG.md automatically with PR title, date, changed files, and AI-generated summary using Gemini API.",
     modules: [
       "GitHub – Search Pull Requests",
+      "HTTP – Make a Request (Gemini API for changelog generation)",
+      "GitHub – Update CHANGELOG.md",
       "Google Sheets – Add Row (Merged PR Logs)",
     ],
   },
@@ -83,16 +85,11 @@ const loggingSheets = [
     sheet: "Merged PR Logs",
     fields: "PR Title, PR ID, Author, Merge timestamp, Summary, Status",
     usage:
-      "Used for dashboard merge trends and future changelog / README automation.",
+      "Used for dashboard merge trends and powers automatic CHANGELOG.md updates.",
   },
 ];
 
 const futureRoadmap = [
-  {
-    title: "Changelog Auto-Generation",
-    description:
-      "On merge, append PR title, AI summary, author, and date to a Google Sheet or `CHANGELOG.md` through GitHub API.",
-  },
   {
     title: "README AI Updates",
     description:
@@ -130,11 +127,15 @@ const systemSummary = [
   },
   {
     module: "HTTP AI Call",
-    purpose: "Executes lint/Gemini analysis to determine PASS or FAIL.",
+    purpose: "Executes lint/Gemini analysis to determine PASS or FAIL, and generates changelog summaries.",
   },
   {
     module: "Comment PR",
     purpose: "Posts automated review outcome back onto the pull request.",
+  },
+  {
+    module: "GitHub Personal Access Token & Gemini API Key",
+    purpose: "Updates CHANGELOG.md automatically on PR merge with title, date, changed files, and AI summary.",
   },
   {
     module: "Google Sheets",
@@ -230,6 +231,19 @@ export default function ScenarioDocumentationPage() {
               />
               <figcaption className="mt-3 text-center text-xs uppercase tracking-[0.3em] text-slate-500">
                 Shared scenario snapshot
+              </figcaption>
+            </figure>
+            <figure className="rounded-3xl border border-slate-200 bg-slate-100/70 p-3 shadow-inner">
+              <Image
+                src="/scenario2.png"
+                alt="Visual overview of the Make.com scenario for GitHub integration including the CHANGELOG.md updation using Gemini API Key"
+                width={900}
+                height={600}
+                className="h-auto w-full rounded-2xl border border-white/70 object-cover"
+                priority
+              />
+              <figcaption className="mt-3 text-center text-xs uppercase tracking-[0.3em] text-slate-500">
+                Shared scenario snapshot including the CHANGELOG.md updation using Gemini API Key on merge
               </figcaption>
             </figure>
           </div>
@@ -344,21 +358,25 @@ export default function ScenarioDocumentationPage() {
                     Branch 3: PR Merge
                   </h3>
                   <p className="mt-3 text-sm text-slate-600">
-                    Logs merged PRs with metadata and primes future changelog
-                    and README automation hooks.
+                    Logs merged PRs with metadata and automatically updates CHANGELOG.md
+                    with PR title, date, changed files, and AI-generated summary.
                   </p>
                   <ul className="mt-4 space-y-2 text-xs text-slate-600">
                     <li className="flex items-center gap-2">
                       <Search size={14} className="text-blue-600" />
-                      Gather PR title + merge info
+                      Gather PR title + merge info + changed files
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Sparkles size={14} className="text-blue-600" />
+                      Generate AI summary using Gemini API
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <GitPullRequest size={14} className="text-blue-600" />
+                      Automatically update CHANGELOG.md via GitHub API
                     </li>
                     <li className="flex items-center gap-2">
                       <Sheet size={14} className="text-blue-600" />
                       Sheets log: status = Merged, timestamps, author
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Sparkles size={14} className="text-blue-600" />
-                      Basis for changelog & README AI updates
                     </li>
                   </ul>
                 </article>
@@ -404,7 +422,7 @@ export default function ScenarioDocumentationPage() {
               <ul className="mt-4 list-disc space-y-2 pl-6 text-sm text-slate-600">
                 <li>PR open automation completes linting, AI review, and logging.</li>
                 <li>PR close automation captures non-merged outcomes for analytics.</li>
-                <li>Merged PR logging ensures changelog-ready metadata.</li>
+                <li>Merged PR automation automatically updates CHANGELOG.md with title, date, changed files, and AI-generated summary using Gemini API.</li>
                 <li>Next.js dashboard surfaces PR trends, contributor activity, and status summaries.</li>
               </ul>
             </div>
