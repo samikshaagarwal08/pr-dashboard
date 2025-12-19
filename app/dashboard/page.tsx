@@ -164,7 +164,7 @@ export default function DashboardPage() {
                   await handleDownloadPDF("dashboard-content");
                   setDownloading(false);
                 }}
-                className="rounded-xl border border-indigo-200 bg-linear-to-r from-indigo-600 via-indigo-500 to-violet-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200/50 transition-all duration-200 hover:translate-y-0.5 hover:shadow-indigo-300/70 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl border cursor-pointer border-indigo-200 bg-linear-to-r from-indigo-600 via-indigo-500 to-violet-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200/50 transition-all duration-200 hover:translate-y-0.5 hover:shadow-indigo-300/70 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={downloading}
               >
                 {downloading ? (
@@ -195,28 +195,28 @@ export default function DashboardPage() {
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-1 gap-2 rounded-2xl bg-indigo-50/70 p-2 sm:grid-cols-2 lg:grid-cols-4">
+            <TabsList className="grid w-full grid-cols-1 gap-2 rounded-sm bg-indigo-50/70 px-2 sm:grid-cols-2 lg:grid-cols-4">
               <TabsTrigger
                 value="overview"
-                className="data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm text-slate-500"
+                className="data-[state=active]:bg-white cursor-pointer data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm text-slate-500"
               >
                 Overview
               </TabsTrigger>
               <TabsTrigger
                 value="contributors"
-                className="data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm text-slate-500"
+                className="data-[state=active]:bg-white cursor-pointer data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm text-slate-500"
               >
                 Contributors
               </TabsTrigger>
               <TabsTrigger
                 value="pulls"
-                className="data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm text-slate-500"
+                className="data-[state=active]:bg-white cursor-pointer data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm text-slate-500"
               >
                 Pull Requests
               </TabsTrigger>
               <TabsTrigger
                 value="reports"
-                className="data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm text-slate-500"
+                className="data-[state=active]:bg-white cursor-pointer data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm text-slate-500"
               >
                 Reports
               </TabsTrigger>

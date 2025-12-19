@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Gauge, Sparkle, BarChart3 } from "lucide-react";
+import Image from "next/image";
 
 const studentInfo = {
   name: "Samiksha Agarwal",
-  project: "UTU Final Year Project",
+  project: "College Of Engineering Roorkee [UTU Batch]",
   rollNo: "220060101139",
   course: "B.Tech Computer Science and Engineering",
 };
@@ -89,8 +90,23 @@ export default function HomePage() {
                 <div className="absolute -top-12 right-6 h-32 w-32 rounded-full bg-white/20 blur-3xl" />
                 <div className="absolute -bottom-16 left-6 h-40 w-40 rounded-full bg-indigo-900/30 blur-3xl" />
                 <div className="relative flex flex-col items-center text-center">
-                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white/15 backdrop-blur">
-                    <Gauge size={36} strokeWidth={2.2} />
+                  <div className="mb-6 flex items-center justify-center gap-4 rounded-full backdrop-blur py-2 px-4">
+                    <Image
+                      src="/coer-logo.png"
+                      alt="COER ROORKEE"
+                      width={1000}
+                      height={1000}
+                      className="object-contain size-24"
+                      priority
+                    />
+                    <Image
+                      src="/utu-logo.png"
+                      alt="UKTECH"
+                      width={1000}
+                      height={1000}
+                      className="object-contain size-24"
+                      priority
+                    />
                   </div>
                   <p className="text-sm font-medium uppercase tracking-[0.3em] text-indigo-100">
                     Final Year Project
