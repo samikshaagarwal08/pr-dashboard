@@ -20,8 +20,15 @@ export const useMakeData = () => {
       try {
         const res = await fetch("/data/make_runs.csv"); // place your csv in /public/data
         const text = await res.text();
-        const parsed = Papa.parse(text, { header: true });
-        setData(parsed.data as MakeRun[]);
+        Papa.parse(text, {
+          header: true,
+          complete: (results: { data: unknown[] }) => {
+            setData(results.data as MakeRun[]);
+          },
+          error: (err: unknown) => {
+            console.error("Error parsing Make.com CSV:", err);
+          },
+        });
       } catch (err) {
         console.error("Error loading Make.com data:", err);
       } finally {
