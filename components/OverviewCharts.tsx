@@ -5,12 +5,13 @@ import { PieChart, Pie, Tooltip, Cell, ResponsiveContainer, BarChart, Bar, XAxis
 
 type OverviewChartsProps = {
   statusBreakdown: { name: string; value: number }[];
-  monthlyActivity: { month: string; count: number }[];
+  monthlyActivity: { month: string; count: number; key: string }[];
+  onMonthSelect?: (key: string) => void;
 };
 
-const STATUS_COLORS = ["#facc15", "#ef4444", "#22c55e"] as const;
+const STATUS_COLORS = ["#22c55e", "#facc15", "#ef4444"] as const;
 
-export default function OverviewCharts({ statusBreakdown, monthlyActivity }: OverviewChartsProps) {
+export default function OverviewCharts({ statusBreakdown, monthlyActivity, onMonthSelect }: OverviewChartsProps) {
   return (
     <div className="space-y-8">
       <div className="grid gap-6 md:grid-cols-2">
@@ -42,7 +43,14 @@ export default function OverviewCharts({ statusBreakdown, monthlyActivity }: Ove
                 <XAxis dataKey="month" />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#3b82f6" />
+                <Bar
+                  dataKey="count"
+                  fill="#3b82f6"
+                  onClick={(_, index) => {
+                    const item = monthlyActivity[index];
+                    if (item?.key && onMonthSelect) onMonthSelect(item.key);
+                  }}
+                />
               </BarChart>
             </ResponsiveContainer>
           )}

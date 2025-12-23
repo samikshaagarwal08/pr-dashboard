@@ -3,7 +3,7 @@
 import { usePRData } from "@/hooks/usePRData";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Download, Sparkle } from "lucide-react";
+import { Download, GitMerge, GitPullRequest, Sparkle, SquareStack } from "lucide-react";
 import { handleDownloadPDF } from "@/utils/handleDownloadPdf";
 import OverviewCharts from "@/components/OverviewCharts";
 import ContributorsView from "@/components/ContributorsView";
@@ -15,6 +15,7 @@ type DashboardHeadlineMetric = {
   label: string;
   value: number;
   accent: string;
+  icon: React.ReactNode;
 };
 
 type DashboardSummary = {
@@ -28,7 +29,7 @@ type DashboardSummary = {
 type DashboardAnalytics = {
   headlineMetrics: DashboardHeadlineMetric[];
   statusBreakdown: { name: string; value: number }[];
-  monthlyActivity: { month: string; count: number }[];
+  monthlyActivity: { month: string; count: number; key: string }[];
   contributors: { name: string; count: number }[];
   summary: DashboardSummary;
 };
@@ -36,6 +37,71 @@ type DashboardAnalytics = {
 export default function DashboardPage() {
   const { data, loading, error } = usePRData();
   const [downloading, setDownloading] = useState(false);
+  const [timeFilter, setTimeFilter] = useState("all");
+
+  const monthOptions = useMemo(() => {
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthSet = new Set<string>();
+
+    data.forEach((pr) => {
+      const createdAt = pr["Created At"];
+      const date = createdAt ? new Date(createdAt) : undefined;
+      if (date && !Number.isNaN(date.getTime())) {
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        monthSet.add(key);
+      }
+    });
+
+    return Array.from(monthSet)
+      .sort((a, b) => b.localeCompare(a))
+      .map((ym) => {
+        const [year, month] = ym.split("-");
+        const monthIndex = Number(month) - 1;
+        const monthLabel = monthIndex >= 0 && monthIndex < monthNames.length ? monthNames[monthIndex] : month;
+        return { value: `month:${ym}`, label: `${monthLabel} '${year.slice(-2)}` };
+      });
+  }, [data]);
+
+  const timeOptions = useMemo(
+    () => [
+      { value: "all", label: "All time" },
+      { value: "last30", label: "Last 30 days" },
+      { value: "last7", label: "Last 7 days" },
+      ...monthOptions,
+    ],
+    [monthOptions],
+  );
+
+  const filteredData = useMemo(() => {
+    const now = Date.now();
+
+    return data.filter((pr) => {
+      const createdAt = pr["Created At"];
+      const date = createdAt ? new Date(createdAt) : undefined;
+      if (!date || Number.isNaN(date.getTime())) return false;
+
+      if (timeFilter === "all") return true;
+
+      if (timeFilter === "last7" || timeFilter === "last30") {
+        const days = timeFilter === "last7" ? 7 : 30;
+        const cutoff = now - days * 24 * 60 * 60 * 1000;
+        return date.getTime() >= cutoff;
+      }
+
+      if (timeFilter.startsWith("month:")) {
+        const ym = timeFilter.replace("month:", "");
+        const [year, month] = ym.split("-");
+        return date.getFullYear() === Number(year) && date.getMonth() + 1 === Number(month);
+      }
+
+      return true;
+    });
+  }, [data, timeFilter]);
+
+  const selectedFilterLabel = useMemo(
+    () => timeOptions.find((opt) => opt.value === timeFilter)?.label ?? "All time",
+    [timeOptions, timeFilter],
+  );
 
   const analytics = useMemo<DashboardAnalytics>(() => {
     const statusCounts = { open: 0, closed: 0, merged: 0 };
@@ -43,7 +109,7 @@ export default function DashboardPage() {
     const monthlyCounts = new Map<string, number>();
     let lintSuccess = 0;
 
-    data.forEach((pr) => {
+    filteredData.forEach((pr) => {
       const status = String(pr.Status ?? "").toLowerCase();
       if (statusCounts.open !== undefined && status === "open") {
         statusCounts.open += 1;
@@ -69,7 +135,7 @@ export default function DashboardPage() {
       }
     });
 
-    const total = data.length;
+    const total = filteredData.length;
     const lintSuccessRate = total === 0 ? 0 : Number(((lintSuccess / total) * 100).toFixed(1));
 
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -79,13 +145,13 @@ export default function DashboardPage() {
         const [year, month] = ym.split("-");
         const monthIndex = Number(month) - 1;
         const monthLabel = monthIndex >= 0 && monthIndex < monthNames.length ? monthNames[monthIndex] : month;
-        return { month: `${monthLabel} '${year.slice(-2)}`, count };
+        return { month: `${monthLabel} '${year.slice(-2)}`, count, key: ym };
       });
 
     const headlineMetrics: DashboardHeadlineMetric[] = [
-      { label: "Merged PRs", value: statusCounts.merged, accent: "text-emerald-600" },
-      { label: "Open PRs", value: statusCounts.open, accent: "text-indigo-600" },
-      { label: "Closed PRs", value: statusCounts.closed, accent: "text-slate-600" },
+      { label: "Merged PRs", value: statusCounts.merged, accent: "text-emerald-600", icon: <GitMerge size={18} /> },
+      { label: "Open PRs", value: statusCounts.open, accent: "text-indigo-600", icon: <GitPullRequest size={18} /> },
+      { label: "Closed PRs", value: statusCounts.closed, accent: "text-slate-600", icon: <SquareStack size={18} /> },
     ];
 
     return {
@@ -107,7 +173,7 @@ export default function DashboardPage() {
         lintSuccessRate,
       },
     };
-  }, [data]);
+  }, [filteredData]);
 
   if (loading) {
     return (
@@ -150,11 +216,31 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-              <div className="rounded-2xl border border-indigo-100 bg-indigo-50/70 px-4 py-3 text-indigo-600 shadow-sm">
+            <div className="w-full rounded-2xl border border-indigo-100 bg-white/80 px-4 py-3 shadow-sm sm:w-64">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-400">
+                Time Filter
+              </p>
+              <select
+                value={timeFilter}
+                onChange={(e) => setTimeFilter(e.target.value)}
+                className="mt-2 w-full cursor-pointer rounded-xl border border-indigo-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                {timeOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-[11px] text-slate-500">
+                Showing {filteredData.length} PR{filteredData.length === 1 ? "" : "s"} · {selectedFilterLabel}
+              </p>
+            </div>
+             <div className="flex flex-col justify-between items-center gap-2">
+             <div className="rounded-lg border border-indigo-100 bg-indigo-50/70 px-4 py-3 text-indigo-600 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-wide text-indigo-400">
                   Last Sync
                 </p>
-                <p className="text-sm font-medium">
+                <p className="text-xs font-medium">
                   {new Date().toLocaleString()}
                 </p>
               </div>
@@ -164,7 +250,7 @@ export default function DashboardPage() {
                   await handleDownloadPDF("dashboard-content");
                   setDownloading(false);
                 }}
-                className="rounded-xl border cursor-pointer border-indigo-200 bg-linear-to-r from-indigo-600 via-indigo-500 to-violet-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200/50 transition-all duration-200 hover:translate-y-0.5 hover:shadow-indigo-300/70 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-lg w-full border cursor-pointer border-indigo-200 bg-linear-to-r from-indigo-600 via-indigo-500 to-violet-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200/50 transition-all duration-200 hover:translate-y-0.5 hover:shadow-indigo-300/70 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={downloading}
               >
                 {downloading ? (
@@ -175,6 +261,7 @@ export default function DashboardPage() {
                   </>
                 )}
               </Button>
+             </div>
             </div>
           </header>
 
@@ -182,14 +269,19 @@ export default function DashboardPage() {
             {analytics.headlineMetrics.map((metric) => (
               <div
                 key={metric.label}
-                className="rounded-2xl border border-slate-200 bg-linear-to-br from-white via-white to-slate-50 p-5 shadow-sm"
+                className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-linear-to-br from-white via-white to-slate-50 p-5 shadow-sm"
               >
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  {metric.label}
-                </p>
-                <p className={`mt-2 text-2xl font-semibold ${metric.accent}`}>
-                  {metric.value}
-                </p>
+                <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600 shadow-sm">
+                  {metric.icon}
+                </div>
+                <div className="flex flex-col">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    {metric.label}
+                  </p>
+                  <p className={`mt-1 text-2xl font-semibold ${metric.accent}`}>
+                    {metric.value}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -227,6 +319,7 @@ export default function DashboardPage() {
                 <OverviewCharts
                   statusBreakdown={analytics.statusBreakdown}
                   monthlyActivity={analytics.monthlyActivity}
+                  onMonthSelect={(key) => setTimeFilter(`month:${key}`)}
                 />
               </div>
             </TabsContent>
@@ -239,7 +332,7 @@ export default function DashboardPage() {
 
             <TabsContent value="pulls" className="mt-8">
               <div className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm">
-                <PullRequestsTable data={data} />
+                <PullRequestsTable data={filteredData} />
               </div>
             </TabsContent>
 

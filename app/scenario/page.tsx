@@ -10,6 +10,7 @@ import {
   Sheet,
   Sparkles,
 } from "lucide-react";
+import WorkflowAnimation from "@/components/WorkflowAnimation";
 
 const overviewCards = [
   {
@@ -61,10 +62,10 @@ const routerBranches = [
     highlight:
       "Logs merged artifacts, updates CHANGELOG.md automatically with PR title, date, changed files, and AI-generated summary using Gemini API.",
     modules: [
-      "GitHub – Search Pull Requests",
-      "HTTP – Make a Request (Gemini API for changelog generation)",
-      "GitHub – Update CHANGELOG.md",
-      "Google Sheets – Add Row (Merged PR Logs)",
+      "GitHub API - Search Pull Requests",
+      "HTTP - Make a Request (Gemini API for changelog generation)",
+      "GitHub - Update CHANGELOG.md",
+      "Google Sheets - Add Row (Merged PR Logs)",
     ],
   },
 ];
@@ -190,6 +191,10 @@ export default function ScenarioDocumentationPage() {
               </p>
             </div>
           </header>
+
+          <div className="mt-8">
+            <WorkflowAnimation />
+          </div>
 
           <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr,0.9fr]">
             <article className="space-y-6">
