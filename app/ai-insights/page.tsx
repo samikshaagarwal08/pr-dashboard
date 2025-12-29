@@ -21,6 +21,7 @@ import {
   YAxis,
 } from "recharts";
 import { FileUp, Loader2, Sparkles } from "lucide-react";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 
 type CsvRow = Record<string, string | number | null | undefined>;
 
@@ -46,6 +47,9 @@ export default function AIInsightsPage() {
   const [insights, setInsights] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [dateFilter, setDateFilter] = useState("all");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -175,20 +179,77 @@ export default function AIInsightsPage() {
       .slice(0, 5);
   }, [comparisonData]);
 
+  const dateOptions = useMemo(
+    () => [
+      { value: "all", label: "All time" },
+      { value: "last30", label: "Last 30 days" },
+      { value: "last7", label: "Last 7 days" },
+      { value: "custom", label: "Custom range" },
+    ],
+    []
+  );
+
+  const handleDateRangeChange = (start: Date | undefined, end: Date | undefined) => {
+    setStartDate(start);
+    setEndDate(end);
+    if (start && end) {
+      setDateFilter("custom");
+    }
+  };
+
+  const handleDateFilterChange = (value: string) => {
+    setDateFilter(value);
+    if (value !== "custom") {
+      setStartDate(undefined);
+      setEndDate(undefined);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-slate-50 px-6 py-12">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
         <header className="flex flex-col gap-4">
-          <span className="inline-flex items-center gap-2 self-start rounded-full bg-indigo-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600">
-            AI Insights
-            <Sparkles size={14} />
-          </span>
-          <h1 className="text-4xl font-semibold text-slate-900">Workflow Intelligence</h1>
-          <p className="max-w-2xl text-base text-slate-600">
-            Upload execution logs or time tracking exports to benchmark manual versus automated
-            effort. Generate AI-written analysis to spotlight wins and prioritise the next set of
-            automations.
-          </p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex-1">
+              <span className="inline-flex items-center gap-2 self-start rounded-full bg-indigo-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600">
+                AI Insights
+                <Sparkles size={14} />
+              </span>
+              <h1 className="mt-4 text-4xl font-semibold text-slate-900">Workflow Intelligence</h1>
+              <p className="mt-3 max-w-2xl text-base text-slate-600">
+                Upload execution logs or time tracking exports to benchmark manual versus automated
+                effort. Generate AI-written analysis to spotlight wins and prioritise the next set of
+                automations.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:w-80">
+              <div className="rounded-2xl border border-indigo-100 bg-white/80 px-4 py-3 shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-400 mb-2">
+                  Date Range
+                </p>
+                <select
+                  value={dateFilter}
+                  onChange={(e) => handleDateFilterChange(e.target.value)}
+                  className="w-full cursor-pointer rounded-xl border border-indigo-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  {dateOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                {dateFilter === "custom" && (
+                  <div className="mt-3">
+                    <DateRangePicker
+                      startDate={startDate}
+                      endDate={endDate}
+                      onDateRangeChange={handleDateRangeChange}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </header>
 
         <section className="grid gap-6 md:grid-cols-[1.75fr_1fr]">

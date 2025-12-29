@@ -132,3 +132,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Date Range Picker Styles */
+.rdp-day_range_start,
+.rdp-day_range_end {
+  background-color: rgb(79 70 229) !important;
+  color: white !important;
+}
+
+.rdp-day_range_middle {
+  background-color: rgb(224 231 255) !important;
+  color: rgb(79 70 229) !important;
+}
+
+.rdp-day_range_start:hover,
+.rdp-day_range_end:hover {
+  background-color: rgb(67 56 202) !important;
+  color: white !important;
+}

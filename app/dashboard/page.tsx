@@ -9,6 +9,7 @@ import OverviewCharts from "@/components/OverviewCharts";
 import ContributorsView from "@/components/ContributorsView";
 import PullRequestsTable from "@/components/PullRequestTable";
 import ReportSection from "@/components/ReportSection";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useMemo, useState } from "react";
 
 type DashboardHeadlineMetric = {
@@ -38,6 +39,8 @@ export default function DashboardPage() {
   const { data, loading, error } = usePRData();
   const [downloading, setDownloading] = useState(false);
   const [timeFilter, setTimeFilter] = useState("all");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   const monthOptions = useMemo(() => {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -68,6 +71,7 @@ export default function DashboardPage() {
       { value: "last30", label: "Last 30 days" },
       { value: "last7", label: "Last 7 days" },
       ...monthOptions,
+      { value: "custom", label: "Custom range" },
     ],
     [monthOptions],
   );
@@ -94,14 +98,45 @@ export default function DashboardPage() {
         return date.getFullYear() === Number(year) && date.getMonth() + 1 === Number(month);
       }
 
+      if (timeFilter === "custom" && startDate && endDate) {
+        const dateTime = date.getTime();
+        const startTime = startDate.getTime();
+        const endTime = endDate.getTime();
+        // Set end date to end of day
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        return dateTime >= startTime && dateTime <= endOfDay.getTime();
+      }
+
       return true;
     });
-  }, [data, timeFilter]);
+  }, [data, timeFilter, startDate, endDate]);
 
   const selectedFilterLabel = useMemo(
-    () => timeOptions.find((opt) => opt.value === timeFilter)?.label ?? "All time",
-    [timeOptions, timeFilter],
+    () => {
+      if (timeFilter === "custom" && startDate && endDate) {
+        return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+      }
+      return timeOptions.find((opt) => opt.value === timeFilter)?.label ?? "All time";
+    },
+    [timeOptions, timeFilter, startDate, endDate],
   );
+
+  const handleDateRangeChange = (start: Date | undefined, end: Date | undefined) => {
+    setStartDate(start);
+    setEndDate(end);
+    if (start && end) {
+      setTimeFilter("custom");
+    }
+  };
+
+  const handleDateFilterChange = (value: string) => {
+    setTimeFilter(value);
+    if (value !== "custom") {
+      setStartDate(undefined);
+      setEndDate(undefined);
+    }
+  };
 
   const analytics = useMemo<DashboardAnalytics>(() => {
     const statusCounts = { open: 0, closed: 0, merged: 0 };
@@ -222,7 +257,7 @@ export default function DashboardPage() {
               </p>
               <select
                 value={timeFilter}
-                onChange={(e) => setTimeFilter(e.target.value)}
+                onChange={(e) => handleDateFilterChange(e.target.value)}
                 className="mt-2 w-full cursor-pointer rounded-xl border border-indigo-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 {timeOptions.map((opt) => (
@@ -231,6 +266,15 @@ export default function DashboardPage() {
                   </option>
                 ))}
               </select>
+              {timeFilter === "custom" && (
+                <div className="mt-3">
+                  <DateRangePicker
+                    startDate={startDate}
+                    endDate={endDate}
+                    onDateRangeChange={handleDateRangeChange}
+                  />
+                </div>
+              )}
               <p className="mt-2 text-[11px] text-slate-500">
                 Showing {filteredData.length} PR{filteredData.length === 1 ? "" : "s"} · {selectedFilterLabel}
               </p>
