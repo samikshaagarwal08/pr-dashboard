@@ -30,7 +30,7 @@ const featureHighlights = [
 export default function HomePage() {
   return (
     <div className="bg-linear-to-br h-screen from-slate-50 via-white to-indigo-50">
-      <main className="mx-auto max-w-6xl px-6 pt-10">
+      <main className="mx-auto max-w-7xl px-6 pt-10">
         <section className="rounded-3xl border border-slate-200/60 bg-white/80 p-12 shadow-xl backdrop-blur-md">
           <div className="flex flex-col gap-12 lg:flex-row">
             <div className="lg:w-3/5">
