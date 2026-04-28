@@ -3,10 +3,10 @@ import { Gauge, Sparkle, BarChart3 } from "lucide-react";
 import Image from "next/image";
 
 const studentInfo = {
-  name: "Samiksha Agarwal",
-  project: "College Of Engineering Roorkee [UTU Batch]",
-  rollNo: "220060101139",
-  course: "B.Tech Computer Science and Engineering",
+  name: "Gourav Dhiman",
+  project: "COER UNIVERSITY",
+  rollNo: "233026097",
+  course: "BCA - B",
 };
 
 const featureHighlights = [
@@ -91,7 +91,7 @@ export default function HomePage() {
                 <div className="absolute -bottom-16 left-6 h-40 w-40 rounded-full bg-indigo-900/30 blur-3xl" />
                 <div className="relative flex flex-col items-center text-center">
                   <div className="mb-6 flex items-center justify-center gap-4 rounded-full backdrop-blur py-2 px-4">
-                    <Image
+                    {/* <Image
                       src="/coer-logo.png"
                       alt="COER ROORKEE"
                       width={1000}
@@ -102,6 +102,14 @@ export default function HomePage() {
                     <Image
                       src="/utu-logo.png"
                       alt="UKTECH"
+                      width={1000}
+                      height={1000}
+                      className="object-contain size-24"
+                      priority
+                    /> */}
+                    <Image
+                      src="/coeru-logo.png"
+                      alt="COER UNIVERSITY ROORKEE"
                       width={1000}
                       height={1000}
                       className="object-contain size-24"
